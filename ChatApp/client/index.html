@@ -1,0 +1,190 @@
+<!-- client/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Main CSS file -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- CSS for file attachments -->
+    <link rel="stylesheet" href="/css/file-attachments.css">
+</head>
+<body>
+    <!-- Authentication Container (Login/Register Views) -->
+    <div id="auth-container">
+        <!-- Wrapper for Auth Forms -->
+        <div id="auth-form-wrapper">
+            <!-- Login View -->
+            <div id="login-view">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <div>
+                        <label for="login-username">Username:</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div>
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                    <!-- Login Error Message -->
+                    <p id="login-error" class="error-message"></p>
+                </form>
+                <p>Don't have an account? <button id="show-register-btn" class="link-button">Register here</button></p>
+            </div>
+
+            <!-- Register View -->
+            <div id="register-view" style="display: none;">
+                <h2>Register</h2>
+                <form id="register-form" enctype="multipart/form-data">
+                     <div>
+                        <label for="register-username">Username:</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div>
+                        <label for="register-password">Password:</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                     <div>
+                        <label for="register-custom-id">Saiyan ID (Optional):</label>
+                        <input type="text" id="register-custom-id">
+                    </div>
+                     <div>
+                        <label for="register-profile-pic">Profile Picture (Optional):</label>
+                        <input type="file" id="register-profile-pic" accept="image/*">
+                    </div>
+                    <button type="submit">Register</button>
+                    <!-- Register Error Message -->
+                    <p id="register-error" class="error-message"></p>
+                    <!-- Register Success Message -->
+                    <p id="register-success" class="success-message"></p>
+                </form>
+                <p>Already have an account? <button id="show-login-btn" class="link-button">Login here</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Container (Chat Interface) -->
+    <div id="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <!-- My Profile Area -->
+            <div id="my-profile-area">
+                <img id="my-profile-pic" src="assets/default-avatar.png" alt="My Profile Picture">
+                <div class="profile-info">
+                    <span id="my-username-display"></span>
+                    <span id="my-customid-display"></span>
+                </div>
+                 <!-- Edit Profile Button -->
+                 <button id="edit-profile-button" class="icon-button"><i class="fas fa-edit"></i></button>
+            </div>
+
+            <!-- Conversation List Header -->
+            <h2>Conversations</h2>
+            <!-- List of Conversations -->
+            <ul id="conversations-list"></ul>
+
+            <!-- Search User by ID Section -->
+            <div id="contact-by-id-section">
+                <h3>Find Saiyan by ID</h3>
+                <form id="contact-id-form">
+                    <input type="text" id="contact-id-input" placeholder="Enter Saiyan ID">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <!-- Contact ID Error Message -->
+                <p id="contact-id-error" class="error-message"></p>
+                <!-- Contact ID Success Message -->
+                <p id="contact-id-success" class="success-message"></p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-wrapper">
+            <!-- Chat Header -->
+            <div id="chat-header">
+                 <h1>Chat with: <span id="current-chat-target"><img src="assets/default-avatar.png" class="chat-target-avatar" alt="Global Chat"> Global Chat</span></h1>
+
+                <!-- Header Controls (Theme, Background, Logout) -->
+                <div id="header-controls">
+                     <!-- Background Selector -->
+                     <div id="background-selector">
+                         <button class="bg-choice" data-bg="default"><i class="fas fa-times"></i></button>
+                         <button class="bg-choice" style="background-image: url('assets/img1.jpg');" data-bg="bg1"></button>
+                         <button class="bg-choice" style="background-image: url('assets/img2.jpg');" data-bg="bg2"></button>
+                         <button class="bg-choice" style="background-image: url('assets/img3.jpg');" data-bg="bg3"></button>
+                         <button class="bg-choice" style="background-image: url('assets/img4.jpg');" data-bg="bg4"></button>
+                         <button class="bg-choice" style="background-image: url('assets/img5.jpg');" data-bg="bg5"></button>
+                         <button class="bg-choice" style="background-image: url('assets/img6.jpg');" data-bg="bg6"></button>
+                     </div>
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle-button" aria-label="Switch theme">🌙</button>
+                    <!-- Logout Button -->
+                    <button id="logout-button"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <ul id="messages"></ul>
+
+            <!-- Input Area -->
+            <div id="input-area">
+                 <!-- File Upload Progress Indicator -->
+                 <p id="file-upload-progress" style="display: none;"></p>
+                 <!-- Message Input Form -->
+                <form id="message-form" enctype="multipart/form-data">
+                     <!-- File Upload Button -->
+                     <label for="fileInput" class="file-upload-btn"><i class="fas fa-paperclip"></i></label>
+                     <input type="file" id="fileInput" style="display: none;">
+                    
+                     <!-- Audio Record Button -->
+                     <button type="button" id="recordButton" class="audio-record-btn" title="Hold to record audio"><i class="fas fa-microphone"></i></button>
+                     
+                     <!-- Message Input Field (using textarea for multi-line) -->
+                     <textarea id="messageInput" placeholder="Type a message..."></textarea>
+                     <!-- Send Message Button -->
+                     <button type="submit" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+                 </form>
+                 <!-- Message Error Display -->
+                 <p id="message-error" class="error-message"></p>
+                 <!-- Recording Indicator -->
+                <p id="recording-indicator" class="recording-indicator" style="display: none;">Recording...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="close-profile-modal">&times;</span>
+            <h2>Edit Profile</h2>
+            <div id="current-profile-pic-preview-wrapper">
+                 <!-- Current Profile Picture Preview -->
+                <img id="current-profile-pic-preview" src="assets/default-avatar.png" alt="Current Profile Picture">
+            </div>
+             <!-- Display User ID -->
+             <p id="edit-profile-id-display">Saiyan ID: <span></span></p>
+            <form id="edit-profile-form">
+                <div>
+                    <label for="edit-profile-pic-input">Choose New Profile Picture:</label>
+                    <input type="file" id="edit-profile-pic-input" accept="image/*" required>
+                </div>
+                <!-- Error and Success Messages for Profile Edit -->
+                <p id="edit-profile-error" class="error-message"></p>
+                <p id="edit-profile-success" class="success-message"></p>
+                <button type="submit">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Socket.IO Script -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Client-side JavaScript -->
+    <script src="/js/client.js"></script>
+</body>
+</html>

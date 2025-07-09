@@ -1,0 +1,484 @@
+/* client/css/style.css */
+
+:root {
+    --font-family-base: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-family-saiyan: "Orbitron", "Roboto", sans-serif;
+
+    /* Light Mode */
+    --bg-color-light: #f0f2f5; --text-color-light: #1c1e21; --header-bg-light: #00a884; --header-text-light: #ffffff;
+    --chat-bg-light: #e5ddd5; --input-area-bg-light: #f0f2f5; --input-bg-light: #ffffff; --input-text-light: #1c1e21;
+    --button-bg-light: #00a884; --button-text-light: #ffffff; --bubble-other-bg-light: #ffffff;
+    --bubble-self-bg-light: #dcf8c6; --bubble-text-light: #1c1e21; --timestamp-color-light: rgba(0,0,0,0.5);
+    --system-message-bg-light: #e9ebee; --system-message-text-light: #606770; --error-color-light: #fa383e;
+    --success-color-light: #28a745; --border-color-light: #dddfe2; --link-color-light: #007bff;
+    --sidebar-bg-light: #f7f7f7; --sidebar-header-bg-light: #008069; --profile-area-bg-light: #e9ebee;
+
+    /* Dark Mode */
+    --bg-color-dark: #18191a; --text-color-dark: #dbdbdb; --header-bg-dark: #3a3b3c; --header-text-dark: #e4e6eb;
+    --chat-bg-dark: #1c1c1c; --input-area-bg-dark: #242526; --input-bg-dark: #3a3b3c; --input-text-dark: #e4e6eb;
+    --button-bg-dark: #4b4c4d; --button-text-dark: #e4e6eb; --bubble-other-bg-dark: #3a3b3c;
+    --bubble-self-bg-dark: #005c4b; --bubble-text-dark: #e4e6eb; --timestamp-color-dark: rgba(228,230,235,0.6);
+    --system-message-bg-dark: #242526; --system-message-text-dark: #b0b3b8; --error-color-dark: #ff8a96;
+    --success-color-dark: #64dd83; --border-color-dark: #3e4042; --link-color-dark: #58a6ff;
+    --sidebar-bg-dark: #242526; --sidebar-header-bg-dark: #3a3b3c; --profile-area-bg-dark: #303030;
+
+    /* Saiyan Mode */
+    --bg-color-saiyan: #0A192F; --text-color-saiyan: #e4e4e4; --header-bg-saiyan: #FFD700; --header-text-saiyan: #0A192F;
+    --chat-bg-saiyan: #172A45; --input-area-bg-saiyan: #0A192F; --input-bg-saiyan: #1D3B61; --input-text-saiyan: #ccd6f6;
+    --button-bg-saiyan: #FFA500; --button-text-saiyan: #0A192F; --bubble-other-bg-saiyan: #1D3B61;
+    --bubble-self-bg-saiyan: #87CEFA; --bubble-text-saiyan: #0A192F; --timestamp-color-saiyan: rgba(0, 0, 0, 0.6);
+    --system-message-bg-saiyan: #112240; --system-message-text-saiyan: #8892b0; --error-color-saiyan: #ff7675;
+    --success-color-saiyan: #FFD700; --border-color-saiyan: #304A6E; --link-color-saiyan: #FFA500;
+    --sidebar-bg-saiyan: #112240; --sidebar-header-bg-saiyan: var(--header-bg-saiyan); --profile-area-bg-saiyan: #0e1f3a;
+}
+
+/* Base & Application des Thèmes */
+body { margin:0; display:flex; flex-direction:column; height:100vh; overflow:hidden; transition: background-color .3s ease, color .3s ease, font-family .3s ease; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family-base); }
+body:not(.dark-mode):not(.saiyan-mode) { --font-family: var(--font-family-base); --bg-color:var(--bg-color-light); --text-color:var(--text-color-light); --header-bg:var(--header-bg-light); --header-text:var(--header-text-light); --chat-bg:var(--chat-bg-light); --input-area-bg:var(--input-area-bg-light); --input-bg:var(--input-bg-light); --input-text:var(--input-text-light); --button-bg:var(--button-bg-light); --button-text:var(--button-text-light); --bubble-other-bg:var(--bubble-other-bg-light); --bubble-self-bg:var(--bubble-self-bg-light); --bubble-text:var(--bubble-text-light); --timestamp-color:var(--timestamp-color-light); --system-message-bg:var(--system-message-bg-light); --system-message-text:var(--system-message-text-light); --error-color:var(--error-color-light); --success-color:var(--success-color-light); --border-color:var(--border-color-light); --link-color:var(--link-color-light); --sidebar-bg: var(--sidebar-bg-light); --sidebar-header-bg: var(--sidebar-header-bg-light); --sidebar-header-text: var(--header-text-light); --profile-area-bg: var(--profile-area-bg-light); }
+body.dark-mode { --font-family: var(--font-family-base); --bg-color:var(--bg-color-dark); --text-color:var(--text-color-dark); --header-bg:var(--header-bg-dark); --header-text:var(--header-text-dark); --chat-bg:var(--chat-bg-dark); --input-area-bg:var(--input-area-bg-dark); --input-bg:var(--input-bg-dark); --input-text:var(--input-text-dark); --button-bg:var(--button-bg-dark); --button-text:var(--button-text-dark); --bubble-other-bg:var(--bubble-other-bg-dark); --bubble-self-bg:var(--bubble-self-bg-dark); --bubble-text:var(--bubble-text-dark); --timestamp-color:var(--timestamp-color-dark); --system-message-bg:var(--system-message-bg-dark); --system-message-text:var(--system-message-text-dark); --error-color:var(--error-color-dark); --success-color:var(--success-color-dark); --border-color:var(--border-color-dark); --link-color:var(--link-color-dark); --sidebar-bg: var(--sidebar-bg-dark); --sidebar-header-bg: var(--sidebar-header-bg-dark); --sidebar-header-text: var(--header-text-dark); --profile-area-bg: var(--profile-area-bg-dark); }
+body.saiyan-mode { --font-family: var(--font-family-saiyan); --bg-color:var(--bg-color-saiyan); --text-color:var(--text-color-saiyan); --header-bg:var(--header-bg-saiyan); --header-text:var(--header-text-saiyan); --chat-bg:var(--chat-bg-saiyan); --input-area-bg:var(--input-area-bg-saiyan); --input-bg:var(--input-bg-saiyan); --input-text:var(--input-text-saiyan); --button-bg:var(--button-bg-saiyan); --button-text:var(--button-text-saiyan); --bubble-other-bg:var(--bubble-other-bg-saiyan); --bubble-self-bg:var(--bubble-self-bg-saiyan); --bubble-text:var(--bubble-text-saiyan); --timestamp-color:var(--timestamp-color-saiyan); --system-message-bg:var(--system-message-bg-saiyan); --system-message-text:var(--system-message-text-saiyan); --error-color:var(--error-color-saiyan); --success-color:var(--success-color-saiyan); --border-color:var(--border-color-saiyan); --link-color:var(--link-color-saiyan); --sidebar-bg: var(--sidebar-bg-saiyan); --sidebar-header-bg: var(--sidebar-header-bg-saiyan); --sidebar-header-text: var(--sidebar-header-text-saiyan); --profile-area-bg: var(--profile-area-bg-saiyan); }
+
+/* Conteneur d'Authentification */
+#auth-container { display:flex; align-items:center; justify-content:center; flex-grow:1; width:100%; background-color: var(--bg-color-saiyan); padding: 20px; box-sizing: border-box; }
+#auth-form-wrapper { background: var(--input-bg-saiyan); color: var(--input-text-saiyan); padding:2rem 2.5rem; border-radius:8px; box-shadow:0 5px 20px rgba(0,0,0,0.2); width:100%; max-width:400px; transition:background-color .3s ease, color .3s ease; }
+#auth-form-wrapper h2 { text-align:center; margin-top:0; margin-bottom:1.5rem; color:var(--header-bg-saiyan); font-weight:700; }
+#auth-form-wrapper form { display:flex; flex-direction:column; gap:1rem; }
+#auth-form-wrapper input[type="text"], #auth-form-wrapper input[type="password"], #auth-form-wrapper input[type="file"] { padding:.75rem 1rem; border:1px solid var(--border-color-saiyan); background-color:var(--input-bg-saiyan); color:var(--input-text-saiyan); border-radius:4px; font-size:1rem; font-family:var(--font-family-saiyan); box-sizing: border-box; width: 100%;}
+#auth-form-wrapper input[type="file"] { padding: .5rem .2rem;}
+#auth-form-wrapper form div label { display:block; margin-bottom:.3rem; font-size:.9em; color:var(--text-color); }
+#auth-form-wrapper button[type="submit"] { padding:.8rem; background-color:var(--button-bg-saiyan); color:var(--button-text-saiyan); border:none; border-radius:4px; font-size:1rem; font-weight:600; cursor:pointer; font-family:var(--font-family-saiyan); transition:opacity .2s ease; }
+#auth-form-wrapper button[type="submit"]:hover { opacity:0.9; }
+#auth-form-wrapper p { text-align:center; margin-top:1.5rem; font-size:0.9em; }
+.link-button { background:none; border:none; color:var(--link-color-saiyan); text-decoration:underline; cursor:pointer; font-size:1em; padding:0; font-family:var(--font-family-saiyan); }
+
+/* Conteneur Principal de l'Application */
+#app-container {
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-color);
+}
+
+/* Sidebar */
+#sidebar {
+    width: 300px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#chat-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+}
+
+#chat-header {
+    padding: 15px 20px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 70%;
+    padding: 5px 10px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+.message.sent {
+    align-self: flex-end;
+    background-color: var(--bubble-self-bg);
+    color: var(--bubble-text);
+}
+
+.message.received {
+    align-self: flex-start;
+    background-color: var(--bubble-other-bg);
+    color: var(--bubble-text);
+}
+
+.message-header {
+    font-size: 0.8em;
+    margin-bottom: 5px;
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+
+#input-area {
+    display:flex;
+    flex-direction:column;
+    padding:10px 16px;
+    background-color:var(--input-area-bg);
+    border-top:1px solid var(--border-color);
+    flex-shrink:0;
+    transition:background-color .3s ease,border-color .3s ease;
+}
+
+#message-form {
+    display:flex;
+    align-items:center;
+    width:100%;
+}
+
+.file-upload-btn {
+    padding:10px 12px;
+    background-color:transparent;
+    color:var(--input-text);
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+    margin-right:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background-color .2s ease, color .2s ease;
+    font-size: 1.1em;
+}
+
+.file-upload-btn:hover {
+    color:var(--link-color);
+}
+
+#messageInput {
+    flex-grow:1;
+    padding:12px 18px;
+    border:none;
+    border-radius:24px;
+    margin-right:12px;
+    font-size:1rem;
+    background-color:var(--input-bg);
+    color:var(--input-text);
+    font-family:var(--font-family);
+    transition:background-color .3s ease,color .3s ease;
+}
+
+#messageInput:focus {
+    outline:none;
+    box-shadow:0 0 0 2px var(--link-color);
+}
+
+#sendButton {
+    padding:10px 20px;
+    background-color:var(--button-bg);
+    color:var(--button-text);
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    transition:opacity .2s ease;
+}
+
+#sendButton:hover {
+    opacity:0.9;
+}
+
+/* Conversation List Styles */
+.conversation {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.conversation:hover {
+    background-color: var(--profile-area-bg);
+}
+
+.conversation .username {
+    font-weight: bold;
+    display: block;
+}
+
+.conversation .custom-id {
+    font-size: 0.8em;
+    color: var(--timestamp-color);
+}
+
+/* Error and Success Messages */
+.error-message {
+    color: var(--error-color);
+    margin: 10px 0;
+}
+
+.success-message {
+    color: var(--success-color);
+    margin: 10px 0;
+}
+
+/* Search User Section */
+#contact-by-id-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: var(--input-area-bg);
+    border-radius: 5px;
+}
+
+#contact-id-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#contact-id-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
+
+#contact-id-form button {
+    padding: 8px 15px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#contact-id-form button:hover {
+    opacity: 0.9;
+}
+
+/* Zone de Chat (Header, Messages, Input) */
+#chat-wrapper { flex-grow:1; display:flex; flex-direction:column; overflow:hidden; background-color:var(--chat-bg); background-size:cover; background-position:center; background-repeat:no-repeat; transition:background-image .5s ease-in-out, background-color .3s ease; }
+
+/* Classes pour les fonds d'écran */
+#chat-wrapper.bg-default { background-image:none; }
+#chat-wrapper.bg-bg1 { background-image: url('../assets/img1.jpg'); }
+#chat-wrapper.bg-bg2 { background-image: url('../assets/img2.jpg'); }
+#chat-wrapper.bg-bg3 { background-image: url('../assets/img3.jpg'); }
+#chat-wrapper.bg-bg4 { background-image: url('../assets/img4.jpg'); }
+#chat-wrapper.bg-bg5 { background-image: url('../assets/img5.jpg'); }
+#chat-wrapper.bg-bg6 { background-image: url('../assets/img6.jpg'); }
+
+/* Header du Chat */
+#chat-header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background-color:var(--header-bg); color:var(--header-text); flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.2); z-index:10; transition:background-color .3s ease,color .3s ease; }
+#chat-header h1 { font-size:1.2rem; font-weight:700; margin:0; text-shadow:1px 1px 2px rgba(0,0,0,0.1); }
+#chat-header h1 #current-chat-target { font-size:0.8em; font-weight:normal; opacity:0.9; margin-left:5px; display: inline-flex; align-items: center;}
+.chat-target-avatar { width: 20px; height: 20px; border-radius: 50%; margin-right: 5px; vertical-align: middle; border: 1px solid var(--header-text); object-fit: cover;}
+#header-controls { display: flex; align-items: center; }
+#header-controls button { background:none; border:none; color:var(--header-text); font-size:1.4rem; cursor:pointer; padding:5px; line-height:1; margin-left:10px; transition:transform .2s ease,color .2s ease; }
+#header-controls button:hover { transform:scale(1.15); color:var(--link-color); }
+#logout-button .fas { font-size:1.2rem; }
+
+/* Sélecteur de fond d'écran */
+#background-selector { display:inline-flex; gap:5px; margin-right:15px; align-items:center; }
+.bg-choice { width:28px; height:28px; border:2px solid var(--header-text); border-radius:50%; cursor:pointer; background-size:cover; background-position:center; background-color:var(--chat-bg); color:var(--header-text); font-weight:bold; font-size:.9em; transition:transform .2s ease,box-shadow .2s ease; outline:none; display: flex; align-items: center; justify-content: center;}
+.bg-choice:hover { transform:scale(1.1); box-shadow:0 0 5px var(--link-color); }
+.bg-choice.active-bg { border-color:var(--link-color); box-shadow:0 0 8px var(--link-color); }
+
+/* Zone des Messages */
+#messages { list-style-type:none; margin:0; padding:1rem 2%; overflow-y:auto; flex-grow:1; overflow-wrap:break-word; }
+.message-item { padding:1px 9px; margin-bottom:.85rem; border-radius:10px; line-height:1.2; max-width:65%; position:relative; clear:both; box-shadow:0 1px 2px rgba(0,0,0,0.1); color:var(--bubble-text); transition:background-color .3s ease,color .3s ease; }
+.message-item:not(.my-message):not(.system-message) { background-color:var(--bubble-other-bg); float:left; border-top-left-radius:0; }
+.message-item.my-message { background-color:var(--bubble-self-bg); float:right; margin-left:auto; border-top-right-radius:0; }
+.message-item.system-message { background-color:var(--system-message-bg); color:var(--system-message-text); font-style:italic; font-size:.85em; text-align:center; width:fit-content; max-width:80%; margin:.5rem auto; padding:6px 12px; float:none; box-shadow:none; border-radius:15px; }
+.timestamp { font-size:.7em; color:var(--timestamp-color); margin-left:10px; display:inline-block; vertical-align:baseline; opacity:0.8; transition:color .3s ease; }
+.username { font-weight:700; color:var(--link-color); margin-right:.5em; display:inline-block; transition:color .3s ease; }
+body.saiyan-mode .username { text-shadow:0 0 3px var(--link-color); }
+.message-text { display:inline; margin-right:5px; }
+
+/* Zone d'Input */
+#input-area { display:flex; flex-direction:column; padding:10px 16px; background-color:var(--input-area-bg); border-top:1px solid var(--border-color); flex-shrink:0; transition:background-color .3s ease,border-color .3s ease; }
+#message-form { display:flex; align-items:center; width:100%; }
+.file-upload-btn { padding:10px 12px; background-color:transparent; color:var(--input-text); border:none; border-radius:50%; cursor:pointer; margin-right:8px; display:flex; align-items:center; justify-content:center; transition:background-color .2s ease, color .2s ease; font-size: 1.1em; }
+.file-upload-btn:hover { color:var(--link-color); }
+#message-input { flex-grow:1; padding:12px 18px; border:none; border-radius:24px; margin-right:12px; font-size:1rem; background-color:var(--input-bg); color:var(--input-text); font-family:var(--font-family); transition:background-color .3s ease,color .3s ease; }
+#message-input:focus { outline:none; box-shadow:0 0 0 2px var(--link-color); }
+
+/* Modal d'Édition de Profil */
+.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.6); padding-top:60px; }
+.modal-content { background-color:var(--input-bg); color:var(--text-color); margin:5% auto; padding:25px; border:1px solid var(--border-color); border-radius:8px; width:80%; max-width:500px; box-shadow:0 5px 15px rgba(0,0,0,0.3); position:relative; }
+.close-modal-btn { color:var(--text-color); float:right; font-size:28px; font-weight:bold; line-height:1; }
+.close-modal-btn:hover, .close-modal-btn:focus { color:var(--error-color); text-decoration:none; cursor:pointer; }
+#edit-profile-modal h2 { text-align:center; margin-top:0; color:var(--header-bg); }
+#current-profile-pic-preview-wrapper { text-align:center; margin-bottom:15px; }
+#current-profile-pic-preview { width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--border-color); }
+#edit-profile-form div { margin-bottom:15px; }
+#edit-profile-form label { display:block; margin-bottom:5px; font-weight:500; }
+#edit-profile-form input[type="file"] { display:block; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:4px; background-color:var(--input-bg); color:var(--input-text); }
+#edit-profile-form button[type="submit"] { background-color:var(--button-bg); color:var(--button-text); padding:10px 15px; border:none; border-radius:4px; cursor:pointer; font-size:1em; width:100%; transition:opacity .2s ease; }
+#edit-profile-form button[type="submit"]:hover { opacity:0.9; }
+#edit-profile-id-display { font-size:0.9em; color:var(--timestamp-color); margin-bottom:15px; text-align:center; }
+#edit-profile-id-display span { font-weight:bold; color:var(--link-color); }
+
+/* Utilitaires : Messages d'erreur/succès */
+.error-message { color:var(--error-color); font-size:.9em; margin-top:8px; margin-bottom:0; min-height:1.2em; text-align:center; font-weight:500; transition:color .3s ease; }
+.success-message { color:var(--success-color); font-size:.9em; margin-top:8px; margin-bottom:0; min-height:1.2em; text-align:center; font-weight:500; transition:color .3s ease; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    #auth-form-wrapper { padding:1.5rem; box-shadow:none; margin: 10px; }
+    #app-container { flex-direction:column; }
+    #sidebar { width:100%; height:auto; max-height: 250px; border-right:none; border-bottom:1px solid var(--border-color); }
+    #my-profile-area { padding:10px; } #my-profile-pic { width:35px; height:35px; }
+    #sidebar h2 { padding:10px; font-size:1em; }
+    #user-list li { padding:8px 12px; }
+    #contact-by-id-section { margin-top: 10px; padding: 10px; }
+    #chat-header { flex-direction: column; gap: 8px; padding: 8px 12px;}
+    #chat-header h1 { font-size:1.1rem; text-align: center; }
+    #header-controls { width: 100%; justify-content: space-around; flex-wrap: wrap; gap: 5px;}
+    #header-controls button { font-size:1.2rem; margin-left:5px; }
+    #background-selector { margin-right: 5px; }
+    .bg-choice { width: 24px; height: 24px; font-size: 0.8em;}
+    #messages { padding:.75rem 3%; } .message-item { max-width:80%; }
+    #input-area { padding:8px 12px; }
+    #message-input, #message-form button[type="submit"] { padding:10px 14px; font-size:.9rem; }
+    .modal-content { width: 90%; margin-top: 20px;}
+}
+
+/* Styles pour la barre de défilement */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background:var(--input-area-bg); }
+::-webkit-scrollbar-thumb { background:var(--button-bg); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:var(--link-color); }
+
+.avatar-circle, .chat-target-avatar, #my-profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    background: var(--input-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+#my-profile-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--profile-area-bg);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+#current-chat-target img.chat-target-avatar {
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Audio Recording Button */
+.audio-record-btn {
+    background: none;
+    border: none;
+    color: var(--input-text);
+    font-size: 1.2rem;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audio-record-btn:hover {
+    background-color: var(--border-color);
+    color: var(--link-color);
+}
+
+.audio-record-btn.recording {
+    background-color: var(--error-color);
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Recording Indicator */
+.recording-indicator {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: center;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Audio Message Styles */
+.audio-message {
+    margin: 5px 0;
+}
+
+.audio-message audio {
+    display: block;
+    width: 100%;
+    height: 40px;
+}
+
+/* Adjust message container for audio messages */
+.message-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message-item .message-text {
+    word-break: break-word;
+}
+
+/* Dark mode audio controls */
+.dark-mode .audio-message {
+    background-color: var(--input-bg-dark);
+}
+
+.dark-mode .audio-message audio::-webkit-media-controls-panel {
+    background-color: var(--input-bg-dark);
+}
+
+.dark-mode .audio-message audio::-webkit-media-controls-current-time-display,
+.dark-mode .audio-message audio::-webkit-media-controls-time-remaining-display {
+    color: var(--input-text-dark);
+}
+
+/* Sidebar Conversation Hover Effect */
+.sidebar-conversation.hovered {
+    background-color: var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* New Message Fade-in Animation */
+.message-item.message-new {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInMessage 0.5s ease-out forwards;
+}
+
+@keyframes fadeInMessage {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

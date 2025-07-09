@@ -1,0 +1,99 @@
+/* Audio Recording Styles */
+.chat-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+}
+
+.input-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.record-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.record-button:hover {
+    background-color: #e0e0e0;
+}
+
+.record-button.recording {
+    color: red;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.audio-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+.audio-message audio {
+    flex: 1;
+    max-width: 300px;
+}
+
+.audio-duration {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* Message Input Styles */
+#messageInput {
+    width: 100%;
+    min-height: 40px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: none;
+    font-family: inherit;
+}
+
+.file-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.file-button:hover {
+    background-color: #e0e0e0;
+}
+
+#sendButton {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+} 

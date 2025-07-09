@@ -1,0 +1,205 @@
+/* Styles for file attachments */
+.message-item .file-attachment {
+    margin-top: 5px;
+    padding: 8px;
+    background-color: var(--system-message-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.message-item .file-attachment a {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: var(--system-message-bg);
+    color: var(--system-message-text);
+    border-radius: 5px;
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    word-break: break-all;
+    transition: opacity 0.2s ease;
+}
+
+.message-item .file-attachment a:hover {
+    opacity: 0.8;
+}
+
+.message-item .file-attachment .fas {
+    margin-right: 5px;
+}
+
+.message-item .file-attachment audio {
+    display: block;
+    margin-top: 5px;
+    max-width: 100%;
+    border-radius: 20px;
+    outline: none;
+}
+
+.message-item .file-attachment img.image-preview {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 5px;
+    margin-top: 5px;
+    display: block;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s ease;
+}
+
+.message-item .file-attachment img.image-preview:hover {
+    transform: scale(1.05);
+}
+
+/* File upload progress */
+#file-upload-progress {
+    font-size: 0.8em;
+    color: var(--link-color);
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* File upload button styles */
+.file-upload-btn {
+    padding: 10px 12px;
+    background-color: transparent;
+    color: var(--input-text);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 1.1em;
+}
+
+.file-upload-btn:hover {
+    color: var(--link-color);
+}
+
+/* Focus styles for input area */
+#message-input:focus ~ .file-upload-btn,
+#message-input:focus ~ #audio-record-btn,
+#message-input:focus ~ button[type="submit"] {
+    color: var(--link-color);
+}
+
+#message-input:focus-within #message-form {
+    box-shadow: 0 0 0 2px var(--link-color);
+    border-radius: 24px;
+}
+
+/* Submit button styles */
+#message-form button[type="submit"] {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background-color 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+}
+
+#message-form button[type="submit"]:hover {
+    opacity: 0.85;
+}
+
+#message-form button .fas {
+    margin-left: 5px;
+}
+
+/* Dark mode adjustments */
+.dark-mode .message-item .file-attachment {
+    background-color: var(--input-bg-dark);
+}
+
+.dark-mode .message-item .file-attachment a {
+    background-color: var(--input-bg-dark);
+    color: var(--input-text-dark);
+}
+
+.dark-mode .message-item .file-attachment img.image-preview {
+    border-color: var(--border-color-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message-item .file-attachment img.image-preview {
+        max-width: 150px;
+        max-height: 100px;
+    }
+    
+    .file-upload-btn {
+        padding: 8px;
+        font-size: 1em;
+    }
+}
+
+/* Styles pour les pièces jointes dans les messages */
+
+/* Conteneur principal de la pièce jointe */
+.file-attachment {
+    margin: 8px 0;
+    padding: 8px;
+    background: var(--message-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Style du lien de la pièce jointe */
+.file-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 4px;
+    transition: background-color 0.2s;
+}
+
+/* Effet de survol sur le lien */
+.file-link:hover {
+    background-color: var(--hover-bg);
+    border-radius: 4px;
+}
+
+/* Style de l'icône dans le lien */
+.file-link i {
+    margin-right: 8px;
+    font-size: 1.2em;
+    color: var(--accent-color);
+}
+
+/* Style du nom du fichier */
+.file-name {
+    flex: 1;
+    margin-right: 8px;
+    word-break: break-all;
+}
+
+/* Style de la taille du fichier */
+.file-size {
+    color: var(--timestamp-color);
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+/* Couleurs spécifiques pour différents types de fichiers */
+.file-link[href$=".pdf"] i { color: #ff4444; } /* Rouge pour PDF */
+.file-link[href$=".doc"] i,
+.file-link[href$=".docx"] i { color: #4285f4; } /* Bleu pour Word */
+.file-link[href$=".xls"] i,
+.file-link[href$=".xlsx"] i { color: #0f9d58; } /* Vert pour Excel */
+.file-link[href$=".ppt"] i,
+.file-link[href$=".pptx"] i { color: #f4b400; } /* Jaune pour PowerPoint */
+.file-link[href$=".zip"] i,
+.file-link[href$=".rar"] i { color: #db4437; } /* Rouge pour archives */
+.file-link[href$=".txt"] i { color: #757575; } /* Gris pour texte */
+.file-link[href$=".jpg"] i,
+.file-link[href$=".jpeg"] i,
+.file-link[href$=".png"] i,
+.file-link[href$=".gif"] i { color: #673ab7; } /* Violet pour images */ 
