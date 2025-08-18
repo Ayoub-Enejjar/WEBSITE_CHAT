@@ -252,10 +252,3 @@ Merci de suivre les bonnes pratiques de codage et de commenter votre code lorsqu
 Ce projet est distribué sous la licence MIT.
 
 ---
-
-## Contact
-
-Pour toute question, suggestion ou simplement pour dire bonjour:
-
-*   **Nom :** ENEJJAR Ayoub, SAMID Oussama, DOUBABI Ali, FELLAH Hamza
-*   **GitHub :** [@Ayoub-Enejjar](https://github.com/Ayoub-Enejjar) / [@DoubabiAli](https://github.com/DoubabiAli) / [@samidos03](https://github.com/samidos03) / [@hamzaX5](https://github.com/hamzaX5)
