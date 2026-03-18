@@ -1,48 +1,56 @@
-// User model for MongoDB
+// User model for MySQL
 import bcrypt from 'bcrypt';
-import { ObjectId } from 'mongodb';
 
 class User {
     constructor(db) {
-        this.collection = db.collection('users');
-    }
-
-    async createTable() {
-        // No need to create table in MongoDB, collections are created automatically
-        return true;
+        this.db = db;
     }
 
     async findByUsername(username) {
-        return this.collection.findOne({ username: username.toLowerCase() });
+        const [rows] = await this.db.execute(
+            'SELECT * FROM users WHERE LOWER(username) = ?',
+            [username.toLowerCase()]
+        );
+        return rows[0];
+    }
+
+    async findByCustomIdOrUsername(searchTerm) {
+        const [rows] = await this.db.execute(
+            'SELECT * FROM users WHERE LOWER(customId) = LOWER(?) OR LOWER(username) = LOWER(?)',
+            [searchTerm, searchTerm]
+        );
+        return rows[0];
     }
 
     async findByCustomId(customId) {
-        return this.collection.findOne({ customId });
+        const [rows] = await this.db.execute(
+            'SELECT * FROM users WHERE LOWER(customId) = LOWER(?)',
+            [customId]
+        );
+        return rows[0];
     }
 
     async findById(id) {
-        return this.collection.findOne({ _id: new ObjectId(id) });
+        const [rows] = await this.db.execute(
+            'SELECT * FROM users WHERE id = ?',
+            [id]
+        );
+        return rows[0];
     }
 
     async create(userData) {
-        const result = await this.collection.insertOne({
-            ...userData,
-            username: userData.username.toLowerCase(),
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-        return result.insertedId;
+        const { username, password, customId, profilePic } = userData;
+        const [result] = await this.db.execute(
+            'INSERT INTO users (username, password, customId, profilePic) VALUES (?, ?, ?, ?)',
+            [username.toLowerCase(), password, customId, profilePic]
+        );
+        return result.insertId;
     }
 
     async updateProfilePic(userId, profilePicPath) {
-        return this.collection.updateOne(
-            { _id: new ObjectId(userId) },
-            { 
-                $set: { 
-                    profilePic: profilePicPath,
-                    updatedAt: new Date()
-                }
-            }
+        return this.db.execute(
+            'UPDATE users SET profilePic = ?, updatedAt = NOW() WHERE id = ?',
+            [profilePicPath, userId]
         );
     }
 
@@ -51,19 +59,18 @@ class User {
     }
 
     async updateUser(userId, updateData) {
-        return this.collection.updateOne(
-            { _id: new ObjectId(userId) },
-            { 
-                $set: { 
-                    ...updateData,
-                    updatedAt: new Date()
-                }
-            }
+        const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+        const values = Object.values(updateData);
+        values.push(userId);
+        
+        return this.db.execute(
+            `UPDATE users SET ${fields}, updatedAt = NOW() WHERE id = ?`,
+            values
         );
     }
 
     async deleteUser(userId) {
-        return this.collection.deleteOne({ _id: new ObjectId(userId) });
+        return this.db.execute('DELETE FROM users WHERE id = ?', [userId]);
     }
 }
 

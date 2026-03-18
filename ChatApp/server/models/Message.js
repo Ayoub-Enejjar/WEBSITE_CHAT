@@ -1,152 +1,143 @@
-// Message model for MongoDB
-import { ObjectId } from 'mongodb';
-
+// Message model for MySQL
 class Message {
     constructor(db) {
-        this.collection = db.collection('messages');
-    }
-
-    async createTable() {
-        // No need to create table in MongoDB, collections are created automatically
-        return true;
+        this.db = db;
     }
 
     async create(messageData) {
-        const result = await this.collection.insertOne({
-            ...messageData,
-            sender: new ObjectId(messageData.sender),
-            recipient: messageData.recipient ? new ObjectId(messageData.recipient) : null,
-            createdAt: new Date(),
-            isRead: false,
-            isDelivered: false
-        });
-        return result.insertedId;
+        const { sender, recipient, content, fileAttachment, audioFile } = messageData;
+        const [result] = await this.db.execute(
+            'INSERT INTO messages (senderId, recipientId, content, fileAttachment, audioFile, createdAt) VALUES (?, ?, ?, ?, ?, NOW())',
+            [
+                sender, 
+                recipient || null, 
+                content, 
+                fileAttachment ? JSON.stringify(fileAttachment) : null, 
+                audioFile ? JSON.stringify(audioFile) : null
+            ]
+        );
+        return result.insertId;
     }
 
     async getMessagesBetweenUsers(userId1, userId2) {
-        return this.collection.find({
-            $or: [
-                { sender: new ObjectId(userId1), recipient: new ObjectId(userId2) },
-                { sender: new ObjectId(userId2), recipient: new ObjectId(userId1) }
-            ]
-        }).sort({ createdAt: 1 }).toArray();
+        const query = `
+            SELECT m.*, u.username as senderUsername, u.customId as senderCustomId, u.profilePic as senderProfilePic
+            FROM messages m
+            JOIN users u ON m.senderId = u.id
+            WHERE (m.senderId = ? AND m.recipientId = ?) 
+               OR (m.senderId = ? AND m.recipientId = ?)
+            ORDER BY m.createdAt ASC
+        `;
+        const [rows] = await this.db.execute(query, [userId1, userId2, userId2, userId1]);
+        
+        // Parse JSON fields
+        return rows.map(msg => ({
+            ...msg,
+            _id: msg.id, // For compatibility
+            sender: msg.senderId,
+            recipient: msg.recipientId,
+            fileAttachment: typeof msg.fileAttachment === 'string' ? JSON.parse(msg.fileAttachment) : msg.fileAttachment,
+            audioFile: typeof msg.audioFile === 'string' ? JSON.parse(msg.audioFile) : msg.audioFile,
+            isRead: !!msg.isRead,
+            isDelivered: !!msg.isDelivered,
+            senderProfile: {
+                id: msg.senderId,
+                username: msg.senderUsername,
+                customId: msg.senderCustomId,
+                profilePic: msg.senderProfilePic || 'assets/default-avatar.png'
+            }
+        }));
     }
 
     async getConversations(userId) {
-        const currentUserId = new ObjectId(userId);
-        const pipeline = [
-            {
-                $match: {
-                    $or: [
-                        { sender: currentUserId },
-                        { recipient: currentUserId }
-                    ]
-                }
+        const query = `
+            SELECT 
+                u.id, 
+                u.username, 
+                u.customId, 
+                u.profilePic,
+                m.content AS lastMessageContent,
+                m.createdAt AS lastMessageTimestamp,
+                m.isRead AS lastMessageIsRead,
+                m.fileAttachment AS lastMessageFileAttachment,
+                m.audioFile AS lastMessageAudioFile,
+                (m.senderId = ?) AS lastMessageIsSentByMe,
+                (SELECT COUNT(*) FROM messages 
+                 WHERE senderId = u.id AND recipientId = ? AND isRead = FALSE) AS unreadCount
+            FROM (
+                SELECT MAX(id) as max_id
+                FROM messages
+                WHERE (senderId = ? OR recipientId = ?)
+                GROUP BY CASE 
+                    WHEN senderId = ? THEN recipientId 
+                    ELSE senderId 
+                END
+            ) as last_msg_ids
+            JOIN messages m ON m.id = last_msg_ids.max_id
+            JOIN users u ON u.id = CASE WHEN m.senderId = ? THEN m.recipientId ELSE m.senderId END
+            WHERE u.id IS NOT NULL
+            ORDER BY m.createdAt DESC
+        `;
+        
+        const [rows] = await this.db.execute(query, [userId, userId, userId, userId, userId, userId]);
+        
+        return rows.map(conv => ({
+            id: conv.id,
+            username: conv.username,
+            customId: conv.customId,
+            profilePic: conv.profilePic,
+            lastMessage: {
+                content: conv.lastMessageContent,
+                timestamp: conv.lastMessageTimestamp,
+                isRead: !!conv.lastMessageIsRead,
+                isSentByMe: !!conv.lastMessageIsSentByMe,
+                fileAttachment: typeof conv.lastMessageFileAttachment === 'string' ? JSON.parse(conv.lastMessageFileAttachment) : conv.lastMessageFileAttachment,
+                audioFile: typeof conv.lastMessageAudioFile === 'string' ? JSON.parse(conv.lastMessageAudioFile) : conv.lastMessageAudioFile
             },
-            {
-                $sort: { createdAt: -1 } // Trier par date de création du message
-            },
-            {
-                $group: {
-                    _id: { // Regrouper par l'autre utilisateur de la conversation
-                        $cond: [
-                            { $eq: ["$sender", currentUserId] },
-                            "$recipient",
-                            "$sender"
-                        ]
-                    },
-                    lastMessageDoc: { $first: "$$ROOT" } // Prendre le document entier du dernier message
-                }
-            },
-            // S'assurer que _id (l'ID de l'autre utilisateur) n'est pas null (cas des messages globaux)
-            {
-                $match: { "_id": { $ne: null } }
-            },
-            {
-                $lookup: { // Joindre avec la collection users pour obtenir les détails de l'autre utilisateur
-                    from: "users",
-                    localField: "_id", // _id ici est l'ID de l'autre utilisateur
-                    foreignField: "_id",
-                    as: "partnerInfo"
-                }
-            },
-            {
-                $unwind: { path: "$partnerInfo", preserveNullAndEmptyArrays: false } // On s'attend à un seul partenaire
-            },
-            // Calculer le nombre de messages non lus de ce partenaire envers l'utilisateur actuel
-            {
-                $lookup: {
-                    from: "messages",
-                    let: { partner_id: "$partnerInfo._id", user_id: currentUserId },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$sender", "$$partner_id"] },
-                                        { $eq: ["$recipient", "$$user_id"] },
-                                        { $eq: ["$isRead", false] }
-                                    ]
-                                }
-                            }
-                        },
-                        { $count: "count" }
-                    ],
-                    as: "unreadMessages"
-                }
-            },
-            {
-                $project: {
-                    _id: 0, // Ne pas inclure le _id du groupe
-                    id: "$partnerInfo._id", // ID de l'autre utilisateur
-                    username: "$partnerInfo.username",
-                    customId: "$partnerInfo.customId",
-                    profilePic: "$partnerInfo.profilePic",
-                    lastMessage: { // Détails du dernier message échangé
-                        _id: "$lastMessageDoc._id",
-                        sender: "$lastMessageDoc.sender",
-                        recipient: "$lastMessageDoc.recipient",
-                        content: "$lastMessageDoc.content",
-                        timestamp: "$lastMessageDoc.createdAt", // Utiliser createdAt
-                        fileAttachment: "$lastMessageDoc.fileAttachment",
-                        audioFile: "$lastMessageDoc.audioFile",
-                        isRead: "$lastMessageDoc.isRead",
-                        isSentByMe: { $eq: ["$lastMessageDoc.sender", currentUserId] }
-                    },
-                    // Obtenir le compte des messages non lus ou 0 s'il n'y en a pas
-                    unreadCount: { $ifNull: [{ $arrayElemAt: ["$unreadMessages.count", 0] }, 0] }
-                }
-            },
-            {
-                $sort: { "lastMessage.timestamp": -1 } // Trier les conversations par le timestamp du dernier message
-            }
-        ];
-
-        try {
-            const conversations = await this.collection.aggregate(pipeline).toArray();
-            return conversations;
-        } catch (error) {
-            console.error("Error in Message.getConversations pipeline:", error);
-            throw error; // Propager l'erreur pour que la route API la gère
-        }
+            unreadCount: conv.unreadCount
+        }));
     }
 
     async markAsDelivered(messageId, userId) {
-        return this.collection.updateOne(
-            { _id: new ObjectId(messageId), recipient: new ObjectId(userId) },
-            { $set: { isDelivered: true } }
+        return this.db.execute(
+            'UPDATE messages SET isDelivered = TRUE WHERE id = ? AND recipientId = ?',
+            [messageId, userId]
         );
     }
 
     async markAsRead(messageId, userId) {
-        return this.collection.updateOne(
-            { _id: new ObjectId(messageId), recipient: new ObjectId(userId) },
-            { $set: { isRead: true } }
+        return this.db.execute(
+            'UPDATE messages SET isRead = TRUE WHERE id = ? AND recipientId = ?',
+            [messageId, userId]
         );
     }
 
     async findById(messageId) {
-        return this.collection.findOne({ _id: new ObjectId(messageId) });
+        const query = `
+            SELECT m.*, u.username as senderUsername, u.customId as senderCustomId, u.profilePic as senderProfilePic
+            FROM messages m
+            JOIN users u ON m.senderId = u.id
+            WHERE m.id = ?
+        `;
+        const [rows] = await this.db.execute(query, [messageId]);
+        const msg = rows[0];
+        if (!msg) return null;
+        
+        return {
+            ...msg,
+            id: msg.id,
+            _id: msg.id,
+            sender: msg.senderId,
+            recipient: msg.recipientId,
+            fileAttachment: typeof msg.fileAttachment === 'string' ? JSON.parse(msg.fileAttachment) : msg.fileAttachment,
+            audioFile: typeof msg.audioFile === 'string' ? JSON.parse(msg.audioFile) : msg.audioFile,
+            senderProfile: {
+                id: msg.senderId,
+                username: msg.senderUsername,
+                customId: msg.senderCustomId,
+                profilePic: msg.senderProfilePic || 'assets/default-avatar.png'
+            }
+        };
     }
 }
 

@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         console.log("Attempting to connect Socket.IO...");
-        socket = io('http://localhost:3001'); // Explicitly connect to port 3001
+        socket = io(); // Connect to the same host/port serving the app
 
         // --- Socket Event Listeners (Moved inside connectSocket) ---
         socket.on('connect', () => {
@@ -827,11 +827,12 @@ document.addEventListener('DOMContentLoaded', () => {
             highlightActiveConversation(user.id);
         }
 
-        socket.on('user not found', () => {
+        socket.on('user not found', (data) => {
             console.log('[Client][Search] User not found');
             // Clear previous messages
             if (contactIdSuccessP) contactIdSuccessP.textContent = '';
-            if (contactIdErrorP) contactIdErrorP.textContent = "User not found. Check the ID and try again.";
+            const msg = (data && data.message) ? data.message : "User not found. Check the ID and try again.";
+            if (contactIdErrorP) contactIdErrorP.textContent = msg;
             if (contactIdInput) contactIdInput.value = '';
         });
 
@@ -1117,7 +1118,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginForm.addEventListener('submit', handleLogin);
     registerForm.addEventListener('submit', handleRegister);
-    contactIdForm.addEventListener('submit', handleUserSearch);
     messageForm.addEventListener('submit', handleMessageSend);
 
     // Form Handlers
@@ -1172,12 +1172,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showError('register-error', 'Registration failed. Please try again.');
         }
-    }
-
-    async function handleUserSearch(e) {
-        e.preventDefault();
-        const customId = document.getElementById('contact-id-input').value;
-        socket.emit('search user', customId);
     }
 
     async function handleMessageSend(e) {

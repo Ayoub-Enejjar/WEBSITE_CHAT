@@ -1,77 +1,72 @@
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import User from './models/User.js';
 import Message from './models/Message.js';
 
 dotenv.config();
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://ayoubcomp24:sSCIQYT9xnen7lIv@cluster0.zybv8bt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-
 let db;
 
 async function initializeDatabase() {
     try {
-        // Connect the client to the server
-        await client.connect();
+        console.log('Connecting to MySQL...');
         
-        // Get the database instance - explicitly connect to 'chatapp'
-        db = client.db("chatapp");  // Connect to the 'chatapp' database
-        
-        // Get existing collections
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map(c => c.name);
-        
-        // Create collections if they don't exist
-        if (!collectionNames.includes('users')) {
-            console.log('Creating users collection...');
-            await db.createCollection("users");
-        }
-        
-        if (!collectionNames.includes('messages')) {
-            console.log('Creating messages collection...');
-            await db.createCollection("messages");
-        }
-        
-        // Create indexes (these are idempotent, so no need to check)
-        console.log('Creating indexes...');
-        await db.collection("users").createIndex({ username: 1 }, { unique: true });
-        await db.collection("users").createIndex({ customId: 1 }, { unique: true });
-        await db.collection("messages").createIndex({ sender: 1, recipient: 1 });
-        await db.collection("messages").createIndex({ createdAt: -1 });
-        
-        // Initialize models with database connection
-        const userModel = new User(db);
-        const messageModel = new Message(db);
+        // First connect without specifying a database to ensure we can create it if missing
+        const connection = await mysql.createConnection({
+            host: process.env.DB_HOST || '127.0.0.1',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '',
+            port: process.env.DB_PORT || 3306,
+            multipleStatements: true
+        });
 
-        // Initialize models (these are now just placeholders for MongoDB)
-        // These methods are for schema initialization in SQLite, not needed for MongoDB
-        // await userModel.createTable();
-        // await messageModel.createTable();
+        const dbName = process.env.DB_NAME || 'chatApp_db';
+        console.log(`Ensuring database "${dbName}" exists...`);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+        await connection.query(`USE \`${dbName}\``);
         
-        console.log("✅ Connected to MongoDB database: chatapp");
-        console.log("✅ Collections and indexes verified");
+        db = connection;
+        console.log(`✅ Connected to MySQL database: ${dbName}`);
+
+        // Create users table
+        const createUsersTable = `
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                customId VARCHAR(10) UNIQUE,
+                profilePic VARCHAR(255),
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `;
+        await db.execute(createUsersTable);
+        console.log('✅ Users table verified');
+
+        // Create messages table
+        const createMessagesTable = `
+            CREATE TABLE IF NOT EXISTS messages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                senderId INT NOT NULL,
+                recipientId INT,
+                content TEXT,
+                fileAttachment JSON,
+                audioFile JSON,
+                isRead BOOLEAN DEFAULT FALSE,
+                isDelivered BOOLEAN DEFAULT FALSE,
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_sender_recipient (senderId, recipientId),
+                INDEX idx_created_at (createdAt)
+            )
+        `;
+        await db.execute(createMessagesTable);
+        console.log('✅ Messages table verified');
+
         return db;
     } catch (error) {
-        console.error('❌ Database connection error:', error);
-        // Add more detailed error logging
-        if (error.name === 'MongoServerError') {
-            console.error('MongoDB Server Error:', error.message);
-        } else if (error.name === 'MongoNetworkError') {
-            console.error('MongoDB Network Error:', error.message);
-            console.error('Please check your internet connection and MongoDB Atlas settings');
-        }
+        console.error('❌ Database connection/initialization error:', error);
         throw error;
     }
 }
 
-// Export models and connection function
-export { initializeDatabase, client, db, User, Message }; 
+export { initializeDatabase, db, User, Message };

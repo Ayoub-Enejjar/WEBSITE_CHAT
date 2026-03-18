@@ -4,8 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { initializeDatabase, client, db, User, Message } from './database.js';
-import { ObjectId } from 'mongodb';
+import { initializeDatabase, db, User, Message } from './database.js';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import path from 'path';
@@ -13,7 +12,6 @@ import fs from 'fs';
 import session from 'express-session';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 
 // Load environment variables
 dotenv.config();
@@ -188,12 +186,8 @@ apiRouter.post('/register', (req, res) => {
         }
         
         try {
-            // Ensure database is connected
-            if (!db) {
-                throw new Error('Database not connected');
-            }
-
             const profilePicFilename = req.file ? req.file.filename : null;
+
             
             // Check if username or customId already exists
             const existingUserByUsername = await userModel.findByUsername(username);
@@ -260,11 +254,6 @@ apiRouter.post('/login', async (req, res) => {
     }
     
     try {
-        // Ensure database is connected
-        if (!db) {
-            throw new Error('Database not connected');
-        }
-
         // Find user by username (case insensitive)
         const user = await userModel.findByUsername(username.toLowerCase());
         console.log("[Auth][Login] User lookup result:", user ? "User found" : "User not found");
@@ -284,9 +273,9 @@ apiRouter.post('/login', async (req, res) => {
         }
         
         // Set user session
-        req.session.userId = user._id;
+        req.session.userId = user.id;
         req.session.user = {
-            id: user._id,
+            id: user.id,
             username: user.username,
             customId: user.customId,
             profilePic: user.profilePic || 'assets/default-avatar.png'
@@ -296,7 +285,7 @@ apiRouter.post('/login', async (req, res) => {
         res.json({ 
             message: 'Logged in successfully!',
             user: {
-                id: user._id,
+                id: user.id,
                 username: user.username,
                 customId: user.customId,
                 profilePic: user.profilePic || 'assets/default-avatar.png'
@@ -336,7 +325,7 @@ apiRouter.get('/check-auth', async (req, res) => {
             const user = await userModel.findById(req.session.userId);
             if (user) {
                 req.session.user = {
-                    id: user._id,
+                    id: user.id,
                     username: user.username,
                     customId: user.customId,
                     profilePic: user.profilePic
@@ -422,8 +411,8 @@ apiRouter.post('/messages/upload', (req, res) => {
             console.log(`[ChatFile] Processing file upload: ${fileInfo.name} (${fileInfo.size} bytes)`);
 
             const messageId = await messageModel.create({
-                sender: new ObjectId(req.session.user.id),
-                recipient: req.body.recipientId ? new ObjectId(req.body.recipientId) : null,
+                sender: req.session.user.id,
+                recipient: req.body.recipientId || null,
                 content: req.body.message || '',
                 fileAttachment: fileInfo,
                 audioFile: null,
@@ -440,7 +429,7 @@ apiRouter.post('/messages/upload', (req, res) => {
             };
 
             const messageData = {
-                _id: messageId.toString(),
+                id: messageId,
                 sender: req.session.user.id,
                 recipient: req.body.recipientId,
                 content: req.body.message || '',
@@ -542,8 +531,8 @@ apiRouter.post('/messages/audio', upload.single('audioFile'), async (req, res) =
         console.log(`[Audio] Audio file info:`, audioInfo);
 
         const messageId = await messageModel.create({
-            sender: new ObjectId(senderId),
-            recipient: new ObjectId(recipientId),
+            sender: senderId,
+            recipient: recipientId,
             content: '[Audio Message]',
             fileAttachment: null,
             audioFile: audioInfo,
@@ -560,7 +549,7 @@ apiRouter.post('/messages/audio', upload.single('audioFile'), async (req, res) =
         };
 
         const messageData = {
-            _id: messageId.toString(),
+            id: messageId,
             sender: senderId,
             recipient: recipientId,
             content: '[Audio Message]',
@@ -659,21 +648,21 @@ apiRouter.post('/messages', async (req, res) => {
 
     try {
         const messageId = await messageModel.create({
-            sender: new ObjectId(req.session.user.id),
-            recipient: new ObjectId(recipientId),
+            sender: req.session.user.id,
+            recipient: recipientId,
             content: content,
             timestamp: new Date()
         });
 
         const message = await messageModel.findById(messageId);
         const formattedMessage = {
-            id: message._id,
-            sender: message.sender,
-            recipient: message.recipient,
+            id: message.id,
+            sender: message.senderId,
+            recipient: message.recipientId,
             content: message.content,
-            timestamp: message.timestamp,
+            timestamp: message.createdAt,
             senderProfile: {
-                id: message.sender,
+                id: message.senderId,
                 username: message.senderUsername,
                 customId: message.senderCustomId,
                 profilePic: message.senderProfilePic
@@ -710,11 +699,11 @@ apiRouter.get('/messages', async (req, res) => { // Changé de '/messages/:userI
                 profilePic: 'assets/default-avatar.png'
             };
             // Essayer de récupérer le profil de l'expéditeur
-            if (message.sender) {
-                const senderUser = await userModel.findById(message.sender.toString());
+            if (message.senderId) {
+                const senderUser = await userModel.findById(message.senderId);
                 if (senderUser) {
                     senderProfileData = {
-                        id: senderUser._id.toString(),
+                        id: senderUser.id,
                         username: senderUser.username,
                         customId: senderUser.customId,
                         profilePic: senderUser.profilePic || 'assets/default-avatar.png'
@@ -723,9 +712,9 @@ apiRouter.get('/messages', async (req, res) => { // Changé de '/messages/:userI
             }
 
             return {
-                _id: message._id.toString(), // Important pour le dataset.timestamp côté client
-                sender: message.sender.toString(),
-                recipient: message.recipient ? message.recipient.toString() : null,
+                _id: message.id, // Important pour le dataset.timestamp côté client
+                sender: message.senderId,
+                recipient: message.recipientId || null,
                 content: message.content,
                 timestamp: message.createdAt, // MongoDB utilise createdAt, le client s'attend à timestamp
                 fileAttachment: message.fileAttachment,
@@ -830,20 +819,20 @@ io.on('connection', (socket) => {
         }
 
         try {
-            const foundUser = await userModel.findByCustomId(customId);
+            const foundUser = await userModel.findByCustomIdOrUsername(customId);
             console.log(`[Socket][Search] Found user:`, foundUser);
 
             if (foundUser) {
-                if (socket.request.session.user && foundUser._id.toString() === socket.request.session.user.id) {
+                if (socket.request.session.user && foundUser.id.toString() === socket.request.session.user.id.toString()) {
                     console.log(`[Socket][Search] User attempted to search for themselves: ${foundUser.username}`);
-                    console.log(`[Socket][Search] Session user ID: ${socket.request.session.user.id}, Found user ID: ${foundUser._id}`);
+                    console.log(`[Socket][Search] Session user ID: ${socket.request.session.user.id}, Found user ID: ${foundUser.id}`);
                     socket.emit('user not found', { message: "You can't start a chat with yourself!" });
                     return;
                 }
 
                 console.log(`[Socket][Search] User found: ${foundUser.username}`);
                 socket.emit('user found', {
-                    id: foundUser._id,
+                    id: foundUser.id,
                     username: foundUser.username,
                     customId: foundUser.customId,
                     profilePic: foundUser.profilePic || 'assets/default-avatar.png'
@@ -872,19 +861,19 @@ io.on('connection', (socket) => {
 
         try {
             const messageId = await messageModel.create({
-                sender: new ObjectId(sender.id),
-                recipient: new ObjectId(recipientId),
+                sender: sender.id,
+                recipient: recipientId,
                 content: message,
                 timestamp: new Date()
             });
 
             const savedMessage = await messageModel.findById(messageId);
             const messageData = {
-                id: savedMessage._id,
-                sender: savedMessage.sender,
-                recipient: savedMessage.recipient,
+                id: savedMessage.id,
+                sender: savedMessage.senderId,
+                recipient: savedMessage.recipientId,
                 content: savedMessage.content,
-                timestamp: savedMessage.timestamp,
+                timestamp: savedMessage.createdAt,
                 senderProfile: {
                     id: savedMessage.sender,
                     username: savedMessage.senderUsername,
@@ -924,12 +913,12 @@ io.on('connection', (socket) => {
 
             if (message) {
                 const senderSockets = Object.entries(activeUsers)
-                    .filter(([_, user]) => user.id === message.sender.toString())
+                    .filter(([_, user]) => user.id === message.senderId.toString())
                     .map(([socketId, _]) => socketId);
 
                 if (senderSockets.length > 0) {
                     senderSockets.forEach(sockId => {
-                        io.to(sockId).emit('message status update', { messageId: message._id.toString(), status: 'delivered' });
+                        io.to(sockId).emit('message status update', { messageId: message.id.toString(), status: 'delivered' });
                     });
                     console.log(`[Server][Status] Emitted status 'delivered' for ${message._id} to sender.`);
                 }
