@@ -19,6 +19,35 @@ class Message {
         return result.insertId;
     }
 
+    async getGlobalMessages() {
+        const query = `
+            SELECT m.*, u.username as senderUsername, u.customId as senderCustomId, u.profilePic as senderProfilePic
+            FROM messages m
+            JOIN users u ON m.senderId = u.id
+            WHERE m.recipientId IS NULL
+            ORDER BY m.createdAt ASC
+        `;
+        const [rows] = await this.db.execute(query);
+        
+        return rows.map(msg => ({
+            ...msg,
+            id: msg.id,
+            _id: msg.id,
+            sender: msg.senderId,
+            recipient: null,
+            fileAttachment: typeof msg.fileAttachment === 'string' ? JSON.parse(msg.fileAttachment) : msg.fileAttachment,
+            audioFile: typeof msg.audioFile === 'string' ? JSON.parse(msg.audioFile) : msg.audioFile,
+            isRead: !!msg.isRead,
+            isDelivered: !!msg.isDelivered,
+            senderProfile: {
+                id: msg.senderId,
+                username: msg.senderUsername,
+                customId: msg.senderCustomId,
+                profilePic: msg.senderProfilePic || 'assets/default-avatar.png'
+            }
+        }));
+    }
+
     async getMessagesBetweenUsers(userId1, userId2) {
         const query = `
             SELECT m.*, u.username as senderUsername, u.customId as senderCustomId, u.profilePic as senderProfilePic
@@ -30,10 +59,10 @@ class Message {
         `;
         const [rows] = await this.db.execute(query, [userId1, userId2, userId2, userId1]);
         
-        // Parse JSON fields
         return rows.map(msg => ({
             ...msg,
-            _id: msg.id, // For compatibility
+            id: msg.id,
+            _id: msg.id,
             sender: msg.senderId,
             recipient: msg.recipientId,
             fileAttachment: typeof msg.fileAttachment === 'string' ? JSON.parse(msg.fileAttachment) : msg.fileAttachment,

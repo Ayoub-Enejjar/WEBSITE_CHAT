@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
+    <title>Cosmic Chat | Obsidian Protocol</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -22,7 +22,7 @@
         <div id="auth-form-wrapper">
             <!-- Login View -->
             <div id="login-view">
-                <h2>Login</h2>
+                <h2>Secure Login</h2>
                 <form id="login-form">
                     <div>
                         <label for="login-username">Username:</label>
@@ -41,7 +41,7 @@
 
             <!-- Register View -->
             <div id="register-view" style="display: none;">
-                <h2>Register</h2>
+                <h2>Create Identity</h2>
                 <form id="register-form" enctype="multipart/form-data">
                      <div>
                         <label for="register-username">Username:</label>
@@ -52,8 +52,8 @@
                         <input type="password" id="register-password" required>
                     </div>
                      <div>
-                        <label for="register-custom-id">Saiyan ID (Optional):</label>
-                        <input type="text" id="register-custom-id">
+                        <label for="register-custom-id">Cosmic ID (Optional):</label>
+                        <input type="text" id="register-custom-id" placeholder="e.g. NOVA-9">
                     </div>
                      <div>
                         <label for="register-profile-pic">Profile Picture (Optional):</label>
@@ -92,7 +92,7 @@
 
             <!-- Search User by ID Section -->
             <div id="contact-by-id-section">
-                <h3>Find Saiyan by ID</h3>
+                <h3>Find User by ID</h3>
                 <form id="contact-id-form">
                     <input type="text" id="contact-id-input" placeholder="Enter Saiyan ID">
                     <button type="submit"><i class="fas fa-search"></i></button>
@@ -113,15 +113,6 @@
                 <!-- Header Controls (Theme, Background, Logout) -->
                 <div id="header-controls">
                      <!-- Background Selector -->
-                     <div id="background-selector">
-                         <button class="bg-choice" data-bg="default"><i class="fas fa-times"></i></button>
-                         <button class="bg-choice" style="background-image: url('assets/img1.jpg');" data-bg="bg1"></button>
-                         <button class="bg-choice" style="background-image: url('assets/img2.jpg');" data-bg="bg2"></button>
-                         <button class="bg-choice" style="background-image: url('assets/img3.jpg');" data-bg="bg3"></button>
-                         <button class="bg-choice" style="background-image: url('assets/img4.jpg');" data-bg="bg4"></button>
-                         <button class="bg-choice" style="background-image: url('assets/img5.jpg');" data-bg="bg5"></button>
-                         <button class="bg-choice" style="background-image: url('assets/img6.jpg');" data-bg="bg6"></button>
-                     </div>
                     <!-- Theme Toggle Button -->
                     <button id="theme-toggle-button" aria-label="Switch theme">🌙</button>
                     <!-- Logout Button -->
@@ -168,7 +159,7 @@
                 <img id="current-profile-pic-preview" src="assets/default-avatar.png" alt="Current Profile Picture">
             </div>
              <!-- Display User ID -->
-             <p id="edit-profile-id-display">Saiyan ID: <span></span></p>
+             <p id="edit-profile-id-display">Cosmic ID: <span></span></p>
             <form id="edit-profile-form">
                 <div>
                     <label for="edit-profile-pic-input">Choose New Profile Picture:</label>

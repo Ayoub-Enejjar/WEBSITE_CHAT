@@ -498,18 +498,9 @@ apiRouter.post('/messages/audio', upload.single('audioFile'), async (req, res) =
         return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
 
+    // recipientId is optional for Global Chat
     const senderId = req.session.user.id;
     const { recipientId } = req.body;
-
-    if (!recipientId) {
-        console.warn('[Audio] Upload attempt without recipient ID');
-        if (req.file && req.file.path) {
-            fs.unlink(req.file.path, (err) => {
-                if (err) console.error("[Audio] Error deleting audio upload with missing recipientId:", err);
-            });
-        }
-        return res.status(400).json({ message: "Recipient ID is required." });
-    }
 
     if (!req.file) {
         console.warn('[Audio] No audio file provided in upload request');
@@ -559,17 +550,23 @@ apiRouter.post('/messages/audio', upload.single('audioFile'), async (req, res) =
             senderProfile: senderProfile
         };
 
-        const recipientSockets = Object.entries(activeUsers)
-            .filter(([_, user]) => user.id === recipientId)
-            .map(([socketId, _]) => socketId);
+        if (recipientId) {
+            const recipientSockets = Object.entries(activeUsers)
+                .filter(([_, user]) => user.id === recipientId)
+                .map(([socketId, _]) => socketId);
 
-        if (recipientSockets.length > 0) {
-            recipientSockets.forEach(sockId => {
-                io.to(sockId).emit('private message received', messageData);
-            });
-            console.log(`[Audio] Emitted audio message to recipient socket: ${recipientSockets.join(', ')}`);
+            if (recipientSockets.length > 0) {
+                recipientSockets.forEach(sockId => {
+                    io.to(sockId).emit('private message received', messageData);
+                });
+                console.log(`[Audio] Emitted audio message to recipient socket: ${recipientSockets.join(', ')}`);
+            } else {
+                console.log(`[Audio] Recipient ${recipientId} is offline. Message saved for later delivery.`);
+            }
         } else {
-            console.log(`[Audio] Recipient ${recipientId} is offline. Message saved for later delivery.`);
+            // Global Audio Message
+            io.emit('chat message', messageData);
+            console.log(`[Audio] Emitted global audio message`);
         }
 
         const senderSockets = Object.entries(activeUsers)
@@ -681,15 +678,19 @@ apiRouter.get('/messages', async (req, res) => { // Changé de '/messages/:userI
         return res.status(401).json({ message: 'Not authenticated' });
     }
 
-    const targetUserId = req.query.with; // Utiliser req.query.with
+    const targetUserId = req.query.with; 
     const currentUserId = req.session.user.id;
 
-    if (!targetUserId) {
-        return res.status(400).json({ message: 'Target user ID ("with" query parameter) is required.' });
-    }
+    // If targetUserId is missing or 'global', fetch global messages
+    const isGlobal = !targetUserId || targetUserId === 'global';
 
     try {
-        const messagesFromDb = await messageModel.getMessagesBetweenUsers(currentUserId, targetUserId);
+        let messagesFromDb;
+        if (isGlobal) {
+            messagesFromDb = await messageModel.getGlobalMessages();
+        } else {
+            messagesFromDb = await messageModel.getMessagesBetweenUsers(currentUserId, targetUserId);
+        }
 
         const formattedMessages = await Promise.all(messagesFromDb.map(async (message) => {
             let senderProfileData = { // Fallback
@@ -844,6 +845,39 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error(`[Socket][Search] Error searching for user with custom ID ${customId}:`, error);
             socket.emit('user not found', { message: 'Server error during search.' });
+        }
+    });
+
+    socket.on('chat message', async (msgContent) => {
+        const sender = socket.request.session.user;
+        if (!sender) return;
+
+        try {
+            const messageId = await messageModel.create({
+                sender: sender.id,
+                recipient: null,
+                content: msgContent,
+                timestamp: new Date()
+            });
+
+            const savedMessage = await messageModel.findById(messageId);
+            const messageData = {
+                id: savedMessage.id,
+                sender: savedMessage.senderId,
+                recipient: null,
+                content: savedMessage.content,
+                timestamp: savedMessage.createdAt,
+                senderProfile: {
+                    id: savedMessage.sender,
+                    username: savedMessage.senderUsername,
+                    customId: savedMessage.senderCustomId,
+                    profilePic: savedMessage.senderProfilePic
+                }
+            };
+
+            io.emit('chat message', messageData);
+        } catch (error) {
+            console.error('[Socket] Error in global chat message:', error);
         }
     });
 
