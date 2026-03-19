@@ -1,0 +1,9 @@
+{
+  "name": "cosmic-chat-root",
+  "version": "1.0.0",
+  "description": "Root package for Cosmic Chat deployment",
+  "scripts": {
+    "start": "cd WEBSITE_CHAT/ChatApp/server && npm start",
+    "build": "cd WEBSITE_CHAT/ChatApp/server && npm install"
+  }
+}

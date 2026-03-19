@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cosmic-chat
+    runtime: node
+    buildCommand: cd WEBSITE_CHAT/ChatApp/server && npm install
+    startCommand: cd WEBSITE_CHAT/ChatApp/server && npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: SESSION_SECRET
+        generateValue: true
